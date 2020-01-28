@@ -115,8 +115,8 @@ matchplus = bind_cols(match, paid)
 # Create a tibble for a range of dates of purchase- let's assume from Dec. 1st- Dec. 5th
 dt = tibble(Purchased = as.Date(x=runif(13, min = as.Date("2019-12-01"), max = as.Date("2019-12-05")), origin = "1970-01-01"))
 
-# Chris bought his gift on April 4th 2019, so he gets his own special early bird tibble
-cb = tibble(Purchased = as.Date("2019-04-04"))
+# Chris bought his gift on April 1st 2019, so he gets his own special early bird tibble
+cb = tibble(Purchased = as.Date("2019-04-01"))
 
 # Bind the rows of cb and dt to add Chris's date of purchase to the randomized purchase dates.
 dpurch = bind_rows(cb, dt)
