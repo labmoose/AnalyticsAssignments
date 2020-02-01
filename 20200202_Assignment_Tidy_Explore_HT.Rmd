@@ -1,0 +1,214 @@
+---
+title: "Secret Santa Data Analysis Project"
+output: github_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+{eval=TRUE}
+# Make sure all code is written in Tidyverse.
+library(tidyverse)
+
+
+## 1. Read submitted csv from fellow classmates.
+## 2. Load data into your own work space.
+
+# Classmate's data set saved as "set_a"
+set_a <- read_csv("C:/Users/labmo/Documents/R/R projects/Santa Project/Assignment_20200119_SY.txt")
+View(set_a)
+# My dataset saved as "set_b"
+set_b <- read_csv("C:/Users/labmo/Documents/R/R projects/Santa Project/ExchangeMatches.csv")
+View(set_b)
+
+# Renaming columns so set_a and set_b use the same terms
+abnames <- c("Giver", "Recipient", "Gift_Price", "Purchase_Date")
+colnames(set_a) <- abnames
+colnames(set_b) <- abnames
+```
+
+In this document, we'll be analyzing the gift-buying activity of two population groups, which are designated "Set A" and "Set B".  We will start by viewing the summary of the data from Set A.
+```{r, echo=FALSE}
+```
+
+<center> __Set A Summary:__ </center>
+```{r}
+sumup_a <- set_a %>% 
+  summary()
+sumup_a
+```
+
+Looking at the data for Set A, the majority of participants spent between $36.01 and $82.62 on their gift.  The cheapest gift purchased was $6.41, while the most expensive gift was purchased for $364.97.  When compared to our median, it appears this maximum gift price may be out of the ordinary for the spending of Set A.
+
+Most gifts purchased in Set A were bought between December 1st and December 3rd 2019, which point towards early-bird spending habits.  However, the latest date of purchase was still the last day a gift could be purchased (December 5th 2019), meaning that even though fewer gift purchases happened later, they did occur across the range of all possible dates.
+
+The earliest purchase date was April 1st 2019, and at a glance it apppears this date may be an outlier as well- we'll examine this further in later analysis.
+
+Next, we'll examine the summary of Set B
+
+<center> __Set B Summary:__ </center>
+```{r}
+sumup_b <- set_b %>% 
+  summary()
+sumup_b
+```
+
+In this population, we see the most participants spent between $31.14 and $74.24 on their gifts, with the minimum price paid being $9.64.  The most expensive gift in Set B was $364.97, the same as in Set A.  Again, with this price being over 6.5 times the median gift price, this may be outside the typical spending for this population as well.
+
+Examining the purchase dates reveals that in Set B most gifts were purchased between December 1st and December 3rd 2019, with a trend toward earlier shopping that matches Set A's habits.  The latest purchase date for Set B is December 4th, which shows an earlier end to this population's gift buying when compared to Set A.  Once again we see a likely outlier in the earliest purchase date for Set B- April 1st 2019.
+
+<center> __Comparing Spending Habits: Cheapskates__ </center>
+
+Doing some quick comparisons of the summaries, Set B has a lower mean, median, and 1st quartile than Set A- we may assume that Set B then has a higher number of participants prefering to buy cheaper gifts (<$20).  But is this the case?
+```{r}
+cheap_a <- c(set_a$Gift_Price < 20) %>% 
+  grep(pattern = TRUE)
+cheap_a
+
+cheap_b <- c(set_b$Gift_Price < 20) %>%
+  grep(pattern = TRUE)
+cheap_b
+```
+
+Yes, as we can see from this comparison that Set B has 3 cheapskates, while Set A only has 1 cheapskate this year.
+
+<center> __Comparing Shopping Habits: Procrastinators__ </center>
+
+When comparing purchase dates, in both Set A and Set B, 25% of participants had purchased their gift on  December 1st 2019. However the latest purchase date for Set A was 2019-12-05, while the lastest purchase date for Set B was December 4th 2019.  Does this mean participants in Set A were more likely to procrastinate in their purchasing than those in Set B? 
+
+```{r}
+proc_a <- c(set_a$Purchase_Date >= "2019-12-04") %>% 
+  grep(pattern = TRUE)
+proc_a
+
+proc_b <- c(set_b$Purchase_Date >= "2019-12-04") %>%
+  grep(pattern = TRUE)
+proc_b
+```
+No- in fact 4 participants in Set B waited until at least December 4th 2019 to make their gift purchase, vs only 3 participants in Set A waiting until at least December 4th to buy their gift.
+
+Looking at the data sets, we can see Chris spent a lot on his gift for Carla, and bought this gift very early in comparison to the rest of the participants in each data set. 
+
+<center> __View Set A:__ </center>
+
+```{r}
+print(set_a)
+```
+
+<center> __View Set B:__ </center>
+```{r}
+print(set_b)
+```
+
+What does the summary of our data look like for our average participant, filtering Chris's activity out of the group (as an outlier)?
+
+<center> __Set A (filtered):__ </center>
+```{r}
+set_axc <- filter(set_a, Giver != "Chris")
+set_axc %>% 
+  summary()
+```
+<center> __Set B (filtered):__ </center>
+```{r}
+set_bxc <- filter(set_b, Giver != "Chris")
+set_bxc %>% 
+  summary()
+```
+We now see that the mean is much lower for both groups, and a new max can be seen.  In (filtered) Set A, the mean amount spent on a gift was $58.99, with most participants spending more than $30.00 and less than $79 on a gift.  The most expensive gift was purchased for $98.61.
+
+In (filtered) Set B, the mean amount spent on a gift was $48.87, with most participants spending at least $27.00, but less than $73.00 on their purchased gift.  The most expensive gift in (filtered) set_b was purchased for $88.81.
+
+We could then expect to sell slightly higher cost gifts on average in stores frequented by participants in Set A vs those in Set B.
+
+<center> __Visual Interpretations__ </center>
+
+Let's get down to the visuals.
+
+I added some additional research I've gathered to the data sets to further compare these sets and also evaluate each sets by family group.
+```{r}
+# Create a variable to group/identify which set observations belong to
+set_a <- set_a %>% 
+  mutate(Set = c("Set_A")) %>% 
+  mutate(Family = c("Scrubs", "Scrubs", "Boat", "Boat", "Parks", "Parks", 
+                    "Modern", "Modern", "Office", "Office", "Office",
+                    "Parks", "Boat", "Parks"))
+
+set_b <- set_b %>% 
+  mutate(Set = "Set_B") %>% 
+  mutate(Family = c("Scrubs", "Scrubs", "Office", "Office", "Parks",
+                    "Parks", "Modern", "Modern", "Boat", "Boat",
+                    "Office", "Parks", "Boat", "Parks"))
+```
+
+How does spending compare amongst the Families in each Set?
+
+<center>
+```{r}
+##Pie Chart A
+# Prepare data to compare which Family group in each set spent the most overall on gifts
+spend_a <- set_a %>% 
+  group_by(Family) %>% 
+  summarise(Total_Spent = sum(Gift_Price))
+pie_label_a <- paste(spend_a$Family, " ", "$", spend_a$Total_Spent)
+pie_set_a = pie(spend_a$Total_Spent, labels = pie_label_a, edges = 300, main = "Total Spending by Family: Set A")
+```
+```{r}
+spend_b <- set_b %>% 
+  group_by(Family) %>% 
+  summarise(Total_Spent = sum(Gift_Price))
+pie_label_b <- paste(spend_b$Family, " ", "$", spend_b$Total_Spent)
+
+pie_set_b = pie(spend_b$Total_Spent, labels = pie_label_b, edges = 300, main = "Total Spending by Family: Set B")
+```
+</center>
+Chris's large gift purchase price puts his family (Scrubs) in the highest total spending bracket for both Set A and Set B.  
+
+In Set A, we see the Parks family has the second highest total spent, followed by Office & Modern, with Boat family having the least total spent.
+
+In Set B, the Parks family again has the second highest total spent, however now Boat & MOdern have the next highest totals, with Office family having the lowest total spent.
+
+Some of these difference may be influenced by family size (the number of participants from each family in this exchange), though this is not witness evenly across Sets (ex: Modern family having only two participants outspending families with 3 participants in each Set).
+
+```{r, echo=FALSE}
+# Create combination sets to view a side-by-side comparison in charts
+set_combo <- set_a %>% 
+  bind_rows(set_b)
+
+
+set_axc <- set_axc %>% 
+  mutate(Set = c("Set_A"))
+set_bxc <- set_bxc %>% 
+  mutate(Set = "Set_B")
+set_comboxc <- set_axc %>% 
+  bind_rows(set_bxc)
+```
+Let's take a look at the purchase dates of each group (excluding Chris's outlier) in a visual form.
+
+<center>
+```{r}
+ggplot(set_comboxc, aes(x = Purchase_Date)) +
+  geom_bar(aes(fill = Set)) +
+  scale_fill_manual(values = c("Set_A" = "dodgerblue2", "Set_B" = "firebrick")) +
+  facet_wrap(~Set) +
+  labs(x = "Date of Purchase", y = "Number of Gifts Purchased", title = "Gifts Purchased by Date: Comparing Sets")+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+</center>
+
+As seen in the bar graphs, December 1st 2019 was the most popular day to purchase gifts for participants in Set A, while those in set B were more likely to shop mid-week, prefering December 3rd and December 4th 2019 for making their purchases. 
+
+
+Lastly, we'll see our summarized data in a boxplot.
+<center>
+```{r}
+ggplot(set_combo, aes(x = Set, y = Gift_Price)) +
+ geom_boxplot(aes(fill = Set, color = Set)) +
+  scale_fill_manual(values = c("dodgerblue2", "firebrick")) +
+  scale_color_manual(values = c("black", "black")) +
+  labs(x = "Population/Set", y = "Price of Gift Purchased", 
+       title = "Comparison of Spending on Gifts Between Sets") +
+  scale_y_log10() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+</center>
+The boxplots visually confirm what was suspected earlier in viewing the set summaries- Chris's expensive gift purchase is an outlier in each set.  We can also see that the spending in Set A was much more tightly grouped than in Set B; Set A participants (outliers excluded), spent between ~$30 to ~$100 on their gifts.  The spending from Set B was much more spread out, rangding from ~$10 to ~$90 on gift purchases.  Average spending on gifts was lower in Set B than in Set A, though Set A did have the lowest price paid for a gift purchased.
+
+It appears from this data that gift shops frequented by the population in Set A can expect to sell slightly higher priced items earlier in the shopping week.  Shops frequented by the population in Set B may benefit from stocking slightly lower priced gifts and expect more purchases to take place mid-to-late week.  However, both sample sets are small, and the differences may not be statistically significant.
