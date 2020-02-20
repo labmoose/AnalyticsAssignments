@@ -1,0 +1,91 @@
+---
+title: "Week of 2/9/2020 Assignment"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+#### Assignment: Tidyverse Review of Data
+
+*Make sure all code is written in Tidyverse.
+1. Download the Titanic Dataset
+    + Download both test and train csv files.
+    + https://github.com/syang1984/AnalyticsAssignments
+2. Load the train dataset into your workspace.
+3. Review train dataset.
+    + Provide summary of data for dataset.
+      + What conclusions can be discerned from the dataset?
+4. Present the data in one of the following comparing various variables to survival:
+    + Bar Graph
+    + Box plot
+    + Bar graph
+    + Scatter plot
+5. Ensure graphs are color coded, labeled and makes sense.
+    + Export graphs and post to github.
+6. Provide short narrative conclusion in RMD.
+7. Label files as such: 20200209_Assignment_(name)_(initials)
+  
+#### Code 
+```{r setup, include=TRUE, echo=TRUE}
+library(tidyverse)
+```
+# Load train dataset
+```{r Load Data}
+setwd("C:/Users/labmo/Documents/R/R projects/Titanic R Project/")
+train <- read_csv("titanic_train.csv.txt")
+```
+```{r Survial Logic}
+train_log <- mutate(train, Survived = as.logical(train$Survived))
+```
+Provide a summary of data for dataset train
+```{r Sum Up}
+train_log %>% 
+  summary()
+```
+
+From the brief summary, we see that in this dataset: passenger IDs range from 1 to 891 (a total of 891 observations); Passenger Class goes from 1 to 3; The youngest passenger was under 6 months old; The oldest passenger was 80 years old; The mean passenger age was 29.7 years; The minimum fare was listed at $0.00; Most fares ranged from $7.91 to $31.00, with the mean fare paid being $32.20; The maximum fare listed was $512.33.
+
+
+They say women and children first, but which sex has more survivors in this data set?
+```{r Bar Plot}
+train_log %>% 
+  filter(Survived == 1) %>% 
+ggplot(aes(x = Sex)) +
+  geom_bar(fill = "steelblue4") +
+  labs(x = "Passenger Sex", y = "Number of Survivors", title = "The Gender Gap: Survival at Sea")
+```
+
+
+The number of female survivors far outpaces the number of male survivors here.
+
+
+What role did Class and Fare price play in survivorship?
+```{r Point Plot}
+train_rmna <- train_log %>% 
+  filter(Pclass != "NA", Fare != "NA", Survived != "NA")
+ggplot(train_log, aes(x = Pclass, y = Fare, color = Survived))+
+  geom_point(position = "jitter", na.rm = TRUE)+
+  scale_x_discrete(limits= c(1, 2, 3))+
+  scale_y_sqrt()+
+  labs(x = "Passenger Class", y = "Fare Paid", title = "The Role of Wealth & Class in Survivorship")
+```
+
+
+As expected, the most expensive fares were for 1st class.  As for survival, 1st and 2nd class passengers had more survivors in their groups, and a trend toward more survivors the higher ther fare within those classes.  For passengers in 3rd class, lower fares came with lower survival.
+
+But the real question is- won't somebody think of the children?
+```{r Box Plot}
+train_rmna %>% 
+  ggplot(aes(x=Survived, y=Age))+
+  geom_boxplot(aes(fill = Survived, color = Survived))+
+  scale_fill_manual(values = c("seagreen4", "skyblue3")) +
+  scale_color_manual(values = c("black", "black")) +
+  labs(x = "Survived T/F", y = "Passenger Age", 
+       title = "The Affect of Age on Survivorship")
+```
+
+
+Overall, age of survivors was slightly younger than that of non-surviors, though the mean age of both survivors and non-survivors were nearly identical.
+
+In this data set, it appears being wealthy, young, and female was a good bet to survive.
